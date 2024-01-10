@@ -7,7 +7,6 @@ import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_ev
 import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_states.dart';
 import 'package:superstate/View/Home/home.dart';
 import 'package:superstate/View/Profile/profile.dart';
-import 'package:superstate/View/practice.dart';
 
 class BottomBar extends StatelessWidget {
   const BottomBar({super.key});
@@ -22,7 +21,7 @@ class BottomBar extends StatelessWidget {
             child: state.currentIndex == 0
                 ? const HomePage()
                 : state.currentIndex == 1
-                ? const YoutubePlayerDemoApp(link: 'https://www.youtube.com/watch?v=pr1PE63j7Cg')
+                ? const Placeholder()
                 : const Profile(),
           ),
           //child: _options[widget.bottomIndex],

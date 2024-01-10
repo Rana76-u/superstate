@@ -1,17 +1,25 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:receive_sharing_intent_plus/receive_sharing_intent_plus.dart';
 import 'package:superstate/View/Widgets/bottom_nav_bar.dart';
 import 'package:superstate/View/Widgets/navigator.dart';
 import 'package:superstate/ViewModel/crud_post.dart';
 
 class CreatePostScreen extends StatelessWidget {
-  const CreatePostScreen({super.key});
+  final String? sharedText;
+  final List<SharedMediaFile>? sharedFiles;
+
+  const CreatePostScreen({super.key, this.sharedText, this.sharedFiles});
 
   @override
   Widget build(BuildContext context) {
 
     TextEditingController textBoxController = TextEditingController();
+    if(sharedText!.isNotEmpty){
+      textBoxController.text = sharedText!;
+      ReceiveSharingIntentPlus.reset();
+    }
 
     return Scaffold(
       appBar: AppBar(

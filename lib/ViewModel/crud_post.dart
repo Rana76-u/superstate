@@ -180,4 +180,35 @@ class CRUDPost {
     });
   }
 
+  Future<void> addComment(String postDocID, String commentText, String uid) async {
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postDocID)
+        .collection('comments')
+        .add({
+      'text': commentText,
+      'uid': uid,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+    // Update comment count in the 'posts' collection
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postDocID)
+        .update({'commentCount': FieldValue.increment(1)});
+  }
+
+  Future<void> addReply(String postDocID, String commentDocID, String replyText, String uid) async {
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postDocID)
+        .collection('comments')
+        .doc(commentDocID)
+        .collection('replies')
+        .add({
+      'text': replyText,
+      'uid': uid,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
 }

@@ -25,7 +25,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         Padding(
           padding: const EdgeInsets.only(right: 15),
-          child: profileImage(FirebaseAuth.instance.currentUser!.photoURL ?? ''),
+          child: profileImage(FirebaseAuth.instance.currentUser!.photoURL ?? '', 35, 35),
         ),
       ],
     );

@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-Widget profileImage(String imageLink) {
+Widget profileImage(String imageLink, double height, double width) {
   return GestureDetector(
     onTap: () {
       ///Go to Profile
@@ -9,8 +9,8 @@ Widget profileImage(String imageLink) {
     child: ClipRRect(
       borderRadius: BorderRadius.circular(50),
       child: CachedNetworkImage(
-        height: 35,
-        width: 35,
+        height: height,
+        width: width,
         imageUrl: imageLink,
         imageBuilder: (context, imageProvider) => Container(
           decoration: BoxDecoration(

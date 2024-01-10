@@ -8,6 +8,8 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
 import 'package:linkify/linkify.dart';
 import 'package:superstate/Blocs/React%20Bloc/react_states.dart';
+import 'package:superstate/View/View%20Post/view_post.dart';
+import 'package:superstate/View/Widgets/navigator.dart';
 import 'package:superstate/View/Widgets/profile_image.dart';
 import 'package:superstate/View/Widgets/youtube_video_player.dart';
 import 'package:superstate/ViewModel/crud_post.dart';
@@ -39,21 +41,44 @@ Widget postCard(
     }
   }
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
+  return GestureDetector(
+    onTap: () {
+      ScreenNavigator.openScreen(
+          context,
+          ViewPostScreen(
+              postDocID: postDocID,
+              commentCount: commentCount,
+              creationTime: creationTime,
+              fileLinks: fileLinks,
+              postText: postText,
+              uid: uid,
+              likeCount: likeCount,
+              dislikeCount: dislikeCount,
+              reaction: reaction,
+              state: state,
+              index: index,
+          ),
+          'RightToLeft');
+    },
+    child: Card(
+      elevation: 0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
 
-      topPart(uid, creationTime),
+          topPart(uid, creationTime),
 
-      postTextWidget(postText),
+          postTextWidget(postText),
 
-      thumbnailWidget(links),
+          thumbnailWidget(links),
 
-      bottomPart(postDocID, reaction, context, state, index),
+          bottomPart(postDocID, reaction, commentCount, likeCount, dislikeCount, context, state, index),
 
-      Divider(thickness: 1, color: Colors.grey.shade200,),
+          Divider(thickness: 1, color: Colors.grey.shade200,),
 
-    ],
+        ],
+      ),
+    ),
   );
 }
 
@@ -92,7 +117,7 @@ Widget topPart(String uid, Timestamp creationTime) {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 10, right: 10),
-                child: profileImage(snapshot.data!.get('imageURL')),
+                child: profileImage(snapshot.data!.get('imageURL'), 35, 35),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,43 +415,80 @@ Future<bool?> onDislikeButtonTapped(int reaction, String postDocID, int index, B
   return Future<bool?>.value(reaction != -1);
 }
 
-Widget bottomPart(String postDocID, int reaction, BuildContext context, ReactState state, int index) {
+Widget bottomPart(
+    String postDocID,
+    int reaction,
+    int commentCount,
+    int likeCount,
+    int dislikeCount,
+    BuildContext context,
+    ReactState state,
+    int index) {
   return Padding(
     padding: const EdgeInsets.only(top: 8),
-    child: Row(
+    child: Column(
       children: [
-        // Comment
-        const Padding(
-          padding: EdgeInsets.only(left: 55, right: 10),
-          child: Icon(MingCute.chat_1_line),
-        ),
+        Row(
+          children: [
+            // Comment
+            const Padding(
+              padding: EdgeInsets.only(left: 55, right: 10),
+              child: Icon(MingCute.chat_1_line),
+            ),
 
-        // Like
+            // Like
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: LikeButton(
+                isLiked: reaction == 1,
+                likeBuilder: (isLiked) {
+                  return isLiked
+                      ? const Icon(MingCute.thumb_up_2_fill)
+                      : const Icon(MingCute.thumb_up_2_line);
+                },
+                onTap: (isLiked) {
+                  return onLikeButtonTapped(reaction, postDocID, index, context);
+                },
+              ),
+            ),
+
+            // Dislike
+            GestureDetector(
+              onTap: () {
+                onDislikeButtonTapped(reaction, postDocID, index, context);
+              },
+              child: reaction == -1
+                  ? const Icon(MingCute.thumb_down_2_fill)
+                  : const Icon(MingCute.thumb_down_2_line),
+            ),
+          ],
+        ),
         Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: LikeButton(
-            isLiked: reaction == 1,
-            likeBuilder: (isLiked) {
-              return isLiked
-                  ? const Icon(MingCute.thumb_up_2_fill)
-                  : const Icon(MingCute.thumb_up_2_line);
-            },
-            onTap: (isLiked) {
-              return onLikeButtonTapped(reaction, postDocID, index, context);
-            },
+          padding: const EdgeInsets.only(left: 55, top: 3),
+          child: Row(
+            children: [
+              textWidget('$commentCount comments'),
+              textWidget('•'),
+              textWidget('$likeCount likes'),
+              textWidget('•'),
+              textWidget('$dislikeCount dislikes'),
+            ],
           ),
-        ),
-
-        // Dislike
-        GestureDetector(
-          onTap: () {
-            onDislikeButtonTapped(reaction, postDocID, index, context);
-          },
-          child: reaction == -1
-              ? const Icon(MingCute.thumb_down_2_fill)
-              : const Icon(MingCute.thumb_down_2_line),
-        ),
+        )
       ],
+    ),
+  );
+}
+
+Widget textWidget(String text) {
+  return Padding(
+    padding: const EdgeInsets.only(right: 5),
+    child: Text(
+      text,
+      style: const TextStyle(
+          color: Colors.grey,
+        fontSize: 11
+      ),
     ),
   );
 }

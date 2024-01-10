@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receive_sharing_intent_plus/receive_sharing_intent_plus.dart';
 import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_bloc.dart';
 import 'package:superstate/Blocs/React%20Bloc/react_bloc.dart';
+import 'package:superstate/View/Create%20Post/create_post.dart';
 import 'package:superstate/View/Widgets/bottom_nav_bar.dart';
 import 'package:superstate/View/login.dart';
 import 'Blocs/Youtube Video Player Bloc/youtube_player_bloc.dart';
@@ -29,9 +30,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  List<SharedMediaFile>? _sharedFiles;
-  String? _sharedText;
-
+  List<SharedMediaFile> _sharedFiles = [];
+  String _sharedText = '';
   late StreamSubscription _intentMediaStreamSubscription;
   late StreamSubscription _intentTextStreamSubscription;
 
@@ -40,13 +40,12 @@ class _MyAppState extends State<MyApp> {
     super.initState();
 
     // For sharing images coming from outside the app while the app is in the memory
-    _intentMediaStreamSubscription =
-        ReceiveSharingIntentPlus.getMediaStream().listen(
+    _intentMediaStreamSubscription = ReceiveSharingIntentPlus.getMediaStream().listen(
               (List<SharedMediaFile> value) {
             setState(() {
               _sharedFiles = value;
               debugPrint(
-                'Shared:${_sharedFiles?.map((f) => f.path).join(',') ?? ''}',
+                'Shared:${_sharedFiles.map((f) => f.path).join(',')}',
               );
             });
           },
@@ -61,7 +60,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           _sharedFiles = value;
           debugPrint(
-            'Shared:${_sharedFiles?.map((f) => f.path).join(',') ?? ''}',
+            'Shared:${_sharedFiles.map((f) => f.path).join(',')}',
           );
         });
       },
@@ -84,7 +83,7 @@ class _MyAppState extends State<MyApp> {
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntentPlus.getInitialText().then((String? value) {
       setState(() {
-        _sharedText = value;
+        _sharedText = value!;
         debugPrint('Shared: $_sharedText');
       });
     });
@@ -120,10 +119,17 @@ class _MyAppState extends State<MyApp> {
 
   Widget screenNavigator() {
     if(FirebaseAuth.instance.currentUser != null) {
-      return const BottomBar();
+
+      if(_sharedText.isNotEmpty || _sharedFiles.isNotEmpty){
+        return CreatePostScreen(sharedText: _sharedText, sharedFiles: _sharedFiles,);
+      }else{
+        return const BottomBar();
+      }
+
     }
     else{
       return const LoginPage();
     }
   }
 }
+
