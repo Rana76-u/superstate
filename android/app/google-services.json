@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "486059733559",
+    "project_id": "superstate-970d5",
+    "storage_bucket": "superstate-970d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:486059733559:android:3d0f8787e9f5b28ab0c5b2",
+        "android_client_info": {
+          "package_name": "com.superstate.superstate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUqkVe_10Ti5rySFL0LTNot2r8BfyEzno"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
