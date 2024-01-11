@@ -8,6 +8,8 @@ import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_st
 import 'package:superstate/View/Home/home.dart';
 import 'package:superstate/View/Profile/profile.dart';
 
+import '../Notification/notification_page.dart';
+
 class BottomBar extends StatelessWidget {
   const BottomBar({super.key});
 
@@ -21,7 +23,7 @@ class BottomBar extends StatelessWidget {
             child: state.currentIndex == 0
                 ? const HomePage()
                 : state.currentIndex == 1
-                ? const Placeholder()
+                ? const NotificationPage()
                 : const Profile(),
           ),
           //child: _options[widget.bottomIndex],

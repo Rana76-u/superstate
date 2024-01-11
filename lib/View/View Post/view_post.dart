@@ -125,7 +125,7 @@ class ViewPostScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if(snapshot.hasData){
           return Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
+            padding: const EdgeInsets.only(left: 15, right: 15, top: 2),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -255,7 +255,7 @@ class ViewPostScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if(snapshot.hasData){
           return Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
+            padding: const EdgeInsets.only(left: 15, right: 15, top: 5),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

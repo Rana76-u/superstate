@@ -1,4 +1,3 @@
-
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
-import 'package:linkify/linkify.dart';
 import 'package:superstate/Blocs/React%20Bloc/react_states.dart';
 import 'package:superstate/View/View%20Post/view_post.dart';
 import 'package:superstate/View/Widgets/navigator.dart';
 import 'package:superstate/View/Widgets/profile_image.dart';
 import 'package:superstate/View/Widgets/youtube_video_player.dart';
 import 'package:superstate/ViewModel/crud_post.dart';
+import 'package:superstate/ViewModel/link_detector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'error.dart';
 import 'loading.dart';
@@ -30,16 +29,6 @@ Widget postCard(
     BuildContext context,
     ReactState state,
     int index) {
-
-  List links = [];
-
-  List<LinkifyElement> linkifyItems = linkify(postText);
-  for (int i = 1; i < linkifyItems.length; i = i + 2) {
-    if (linkifyItems[i] is UrlElement) {
-      UrlElement urlElement = linkifyItems[i] as UrlElement;
-      links.add(urlElement.url);
-    }
-  }
 
   return GestureDetector(
     onTap: () {
@@ -70,9 +59,10 @@ Widget postCard(
 
           postTextWidget(postText),
 
-          thumbnailWidget(links),
+          thumbnailWidget(LinkDetector().detect(postText)),
 
-          bottomPart(postDocID, reaction, commentCount, likeCount, dislikeCount, context, state, index),
+          bottomPart(postDocID, reaction, commentCount, likeCount, dislikeCount, context, state, index,
+            creationTime, fileLinks, postText, uid,),
 
           Divider(thickness: 1, color: Colors.grey.shade200,),
 
@@ -399,17 +389,17 @@ Widget thumbnailWidget(List links){
   }
 }
 
-Future<bool?> onLikeButtonTapped(int reaction, String postDocID, int index, BuildContext context) {
+Future<bool?> onLikeButtonTapped(int reaction, String postDocID, int index, BuildContext context, String uid) {
 
-  CRUDPost().reactionManager(postDocID, 1, reaction, context, index);
+  CRUDPost().reactionManager(postDocID, 1, reaction, context, index, uid);
 
   // Return the new reaction state
   return Future<bool?>.value(reaction != 1);
 }
 
-Future<bool?> onDislikeButtonTapped(int reaction, String postDocID, int index, BuildContext context) {
+Future<bool?> onDislikeButtonTapped(int reaction, String postDocID, int index, BuildContext context, String uid) {
 
-  CRUDPost().reactionManager(postDocID, -1, reaction, context, index);
+  CRUDPost().reactionManager(postDocID, -1, reaction, context, index, uid);
 
   // Return the new reaction state
   return Future<bool?>.value(reaction != -1);
@@ -423,7 +413,11 @@ Widget bottomPart(
     int dislikeCount,
     BuildContext context,
     ReactState state,
-    int index) {
+    int index,
+    Timestamp creationTime,
+    List<dynamic> fileLinks,
+    String postText,
+    String uid) {
   return Padding(
     padding: const EdgeInsets.only(top: 8),
     child: Column(
@@ -431,9 +425,29 @@ Widget bottomPart(
         Row(
           children: [
             // Comment
-            const Padding(
-              padding: EdgeInsets.only(left: 55, right: 10),
-              child: Icon(MingCute.chat_1_line),
+            Padding(
+              padding: const EdgeInsets.only(left: 55, right: 10),
+              child: GestureDetector(
+                  onTap: () {
+                    ScreenNavigator.openScreen(
+                        context,
+                        ViewPostScreen(
+                          postDocID: postDocID,
+                          commentCount: commentCount,
+                          creationTime: creationTime,
+                          fileLinks: fileLinks,
+                          postText: postText,
+                          uid: uid,
+                          likeCount: likeCount,
+                          dislikeCount: dislikeCount,
+                          reaction: reaction,
+                          state: state,
+                          index: index,
+                        ),
+                        'RightToLeft');
+                  },
+                child: const Icon(MingCute.chat_1_line)
+              ),
             ),
 
             // Like
@@ -447,7 +461,7 @@ Widget bottomPart(
                       : const Icon(MingCute.thumb_up_2_line);
                 },
                 onTap: (isLiked) {
-                  return onLikeButtonTapped(reaction, postDocID, index, context);
+                  return onLikeButtonTapped(reaction, postDocID, index, context, uid);
                 },
               ),
             ),
@@ -455,7 +469,7 @@ Widget bottomPart(
             // Dislike
             GestureDetector(
               onTap: () {
-                onDislikeButtonTapped(reaction, postDocID, index, context);
+                onDislikeButtonTapped(reaction, postDocID, index, context, uid);
               },
               child: reaction == -1
                   ? const Icon(MingCute.thumb_down_2_fill)

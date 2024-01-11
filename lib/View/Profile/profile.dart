@@ -12,17 +12,20 @@ class Profile extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    AuthService().signOut();
-
-                    ScreenNavigator.openScreen(context, const LoginPage(), 'BottomToTop');
-                  },
-                  child: const Text("Logout")
-              )
-            ],
+          child: Center(
+            heightFactor: 15,
+            child: Column(
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      AuthService().signOut();
+                
+                      ScreenNavigator.openScreen(context, const LoginPage(), 'BottomToTop');
+                    },
+                    child: const Text("Logout")
+                )
+              ],
+            ),
           ),
         ),
       ),

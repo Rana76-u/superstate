@@ -15,7 +15,7 @@ class HomeFloatingActionButton extends StatelessWidget {
         child: FloatingActionButton.extended(
           onPressed: () {
             //open create post screen
-            ScreenNavigator.openScreen(context, const CreatePostScreen(), 'BottomToTop');
+            ScreenNavigator.openScreen(context, const CreatePostScreen(sharedText: '', sharedFiles: [],), 'BottomToTop');
           },
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100.0),

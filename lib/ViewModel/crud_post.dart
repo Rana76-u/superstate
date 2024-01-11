@@ -1,13 +1,12 @@
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:linkify/linkify.dart';
-
 import '../Blocs/React Bloc/react_bloc.dart';
 import '../Blocs/React Bloc/react_events.dart';
+import 'notification_sender.dart';
 
 class CRUDPost {
 
@@ -46,7 +45,6 @@ class CRUDPost {
       'postText': postText,
       'dislikeCount': 0,
       'likeCount': 0,
-      'comments': FieldValue.arrayUnion([]),
       'commentCount': 0,
       'fileLinks': FieldValue.arrayUnion([]),
     });
@@ -59,6 +57,33 @@ class CRUDPost {
         .update({
       'posts': FieldValue.arrayUnion([postID])
     });
+
+    //link check
+    /*List links = LinkDetector().detect(postText);
+    String description = postText;
+    if(links.isNotEmpty) {
+      description = LinkDetector().fetchTitle(links[0]).toString();
+    }*/
+
+    //send Notification
+    await SendNotification.toAll(
+        '${FirebaseAuth.instance.currentUser!.displayName} added a new post.',
+        postText,
+        postID
+    );
+
+    //Save the notification
+    await FirebaseFirestore
+        .instance
+        .collection('notifications')
+        .doc()
+        .set({
+      'uid': FirebaseAuth.instance.currentUser!.uid,
+      'timestamp': DateTime.now(),
+      'postID': postID,
+      'title': '${FirebaseAuth.instance.currentUser!.displayName} added a new post.',
+      'description': postText
+    });
   }
 
   Future<void> reactionManager(
@@ -66,7 +91,8 @@ class CRUDPost {
       int reactionToAdd,
       int currentReaction,
       BuildContext context,
-      int index
+      int index,
+      String uid,
       ) async {
     final provider = BlocProvider.of<ReactBloc>(context);
 
@@ -83,16 +109,18 @@ class CRUDPost {
     if(reactionToAdd == 1){
       //Already Liked But Wanna Withdraw, then decrease like
       if (currentReaction == 1) {
+        provider.add(NeutralEvent(index: index));
+
         likeCount = likeCount - 1;
 
         changeReaction(postDocID, 0);
 
         updateLikeCount(postDocID, likeCount);
-
-        provider.add(NeutralEvent(index: index));
       }
       //Already Disliked But Wanna Like, then decrease like and increase dislike
       else if(currentReaction == -1){
+        provider.add(LikeEvent(index: index));
+
         likeCount = likeCount + 1;
         dislikeCount = dislikeCount - 1;
 
@@ -101,30 +129,35 @@ class CRUDPost {
         updateLikeCount(postDocID, likeCount);
         updateDisLikeCount(postDocID, dislikeCount);
 
-        provider.add(LikeEvent(index: index));
+        sendNotificationOnLike(uid, postDocID);
       }
       else if(currentReaction == 0) {
+        provider.add(LikeEvent(index: index));
+
         likeCount = likeCount + 1;
         updateLikeCount(postDocID, likeCount);
 
         changeReaction(postDocID, 1);
 
-        provider.add(LikeEvent(index: index));
+        sendNotificationOnLike(uid, postDocID);
       }
     }
     //dislike button clicked
     else if(reactionToAdd == -1){
       //Already DisLiked But Wanna Withdraw, then decrease DisLiked
       if (currentReaction == -1) {
+        provider.add(NeutralEvent(index: index));
+
         dislikeCount = dislikeCount - 1;
 
         changeReaction(postDocID, 0);
 
         updateDisLikeCount(postDocID, dislikeCount);
-        provider.add(NeutralEvent(index: index));
       }
       //Already Liked But Wanna DisLike, then decrease DisLike and increase Like
       else if(currentReaction == 1){
+        provider.add(DislikeEvent(index: index));
+
         dislikeCount = dislikeCount + 1;
         likeCount = likeCount - 1;
 
@@ -132,17 +165,15 @@ class CRUDPost {
 
         updateDisLikeCount(postDocID, dislikeCount);
         updateLikeCount(postDocID, likeCount);
-
-        provider.add(DislikeEvent(index: index));
       }
       else if(currentReaction == 0) {
+        provider.add(DislikeEvent(index: index));
+
         dislikeCount = dislikeCount + 1;
 
         changeReaction(postDocID, -1);
 
         updateDisLikeCount(postDocID, dislikeCount);
-
-        provider.add(DislikeEvent(index: index));
       }
     }
 
@@ -180,6 +211,23 @@ class CRUDPost {
     });
   }
 
+  void sendNotificationOnLike(String uid, String postDocID) async {
+
+    DocumentSnapshot documentSnapshot =
+    await FirebaseFirestore
+        .instance
+        .collection('/userData').doc(uid).get();
+
+    String token = await documentSnapshot.get('token');
+
+    await SendNotification.toSpecific(
+        '${FirebaseAuth.instance.currentUser!.displayName} liked your post.',
+        '',
+        token,
+        postDocID
+    );
+  }
+
   Future<void> addComment(String postDocID, String commentText, String uid) async {
     await FirebaseFirestore.instance
         .collection('posts')
@@ -195,6 +243,8 @@ class CRUDPost {
         .collection('posts')
         .doc(postDocID)
         .update({'commentCount': FieldValue.increment(1)});
+
+    sendNotificationOnComment(uid, commentText, postDocID);
   }
 
   Future<void> addReply(String postDocID, String commentDocID, String replyText, String uid) async {
@@ -209,6 +259,42 @@ class CRUDPost {
       'uid': uid,
       'timestamp': FieldValue.serverTimestamp(),
     });
+
+    sendNotificationOnReply(uid, replyText, postDocID);
   }
 
+
+  void sendNotificationOnComment(String uid, String commentText, String postDocID) async {
+
+    DocumentSnapshot documentSnapshot =
+    await FirebaseFirestore
+        .instance
+        .collection('/userData').doc(uid).get();
+
+    String token = await documentSnapshot.get('token');
+
+    await SendNotification.toSpecific(
+        '${FirebaseAuth.instance.currentUser!.displayName} commented on your post.',
+        commentText,
+        token,
+        postDocID
+    );
+  }
+
+  void sendNotificationOnReply(String uid, String replyText, String postDocID) async {
+
+    DocumentSnapshot documentSnapshot =
+    await FirebaseFirestore
+        .instance
+        .collection('/userData').doc(uid).get();
+
+    String token = await documentSnapshot.get('token');
+
+    await SendNotification.toSpecific(
+        '${FirebaseAuth.instance.currentUser!.displayName} replied to your comment.',
+        replyText,
+        token,
+        postDocID
+    );
+  }
 }

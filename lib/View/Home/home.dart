@@ -36,7 +36,10 @@ class HomePage extends StatelessWidget{
 
   Widget postsWidget(ReactState state) {
     return FutureBuilder(
-        future: FirebaseFirestore.instance.collection('posts').get(),
+        future: FirebaseFirestore
+            .instance
+            .collection('posts')
+            .orderBy('creationTime', descending: true).get(),
         builder: (context, snapshot) {
           if(snapshot.hasData){
             return ListView.builder(

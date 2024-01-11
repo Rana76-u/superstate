@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_bloc.dart';
@@ -27,9 +28,26 @@ class LoginPage extends StatelessWidget {
         'email': FirebaseAuth.instance.currentUser!.email,
         'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
         'gender': 'not selected',
-        'posts': FieldValue.arrayUnion([])
+        'posts': FieldValue.arrayUnion([]),
+        'token': ''
       });
     }
+
+    getToken();
+  }
+
+  void getToken() async {
+    await FirebaseMessaging.instance.getToken().then(
+            (token) {
+          saveTokenInFirebase(token!);
+        }
+    );
+  }
+  void saveTokenInFirebase(String token) async {
+    await FirebaseFirestore.instance.collection('userData')
+        .doc(FirebaseAuth.instance.currentUser!.uid).update({
+      'token': token,
+    });
   }
 
   @override

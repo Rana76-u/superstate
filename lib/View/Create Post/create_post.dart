@@ -7,17 +7,17 @@ import 'package:superstate/View/Widgets/navigator.dart';
 import 'package:superstate/ViewModel/crud_post.dart';
 
 class CreatePostScreen extends StatelessWidget {
-  final String? sharedText;
-  final List<SharedMediaFile>? sharedFiles;
+  final String sharedText;
+  final List<SharedMediaFile> sharedFiles;
 
-  const CreatePostScreen({super.key, this.sharedText, this.sharedFiles});
+  const CreatePostScreen({super.key, required this.sharedText, required this.sharedFiles});
 
   @override
   Widget build(BuildContext context) {
 
     TextEditingController textBoxController = TextEditingController();
-    if(sharedText!.isNotEmpty){
-      textBoxController.text = sharedText!;
+    if(sharedText.isNotEmpty){
+      textBoxController.text = sharedText;
       ReceiveSharingIntentPlus.reset();
     }
 

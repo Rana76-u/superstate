@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'package:superstate/View/Create%20Post/create_post.dart';
 import 'package:superstate/View/Widgets/bottom_nav_bar.dart';
 import 'package:superstate/View/login.dart';
 import 'Blocs/Youtube Video Player Bloc/youtube_player_bloc.dart';
+import 'ViewModel/firebase_api.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -18,6 +18,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FirebaseApi().initNotifications();
   runApp(const MyApp());
 }
 
@@ -83,7 +84,7 @@ class _MyAppState extends State<MyApp> {
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntentPlus.getInitialText().then((String? value) {
       setState(() {
-        _sharedText = value!;
+        _sharedText = value ?? '';
         debugPrint('Shared: $_sharedText');
       });
     });
