@@ -59,7 +59,7 @@ Widget postCard(
 
           postTextWidget(postText),
 
-          thumbnailWidget(LinkDetector().detect(postText)),
+          thumbnailWidget(LinkDetector().detect(postText), context),
 
           bottomPart(postDocID, reaction, commentCount, likeCount, dislikeCount, context, state, index,
             creationTime, fileLinks, postText, uid,),
@@ -166,7 +166,7 @@ Widget postTextWidget(String postText) {
   );
 }
 
-Widget thumbnailWidget(List links){
+Widget thumbnailWidget(List links, BuildContext context){
   if(links.isEmpty){
     return const SizedBox();
   }
@@ -176,7 +176,7 @@ Widget thumbnailWidget(List links){
       ScrollController scrollController = ScrollController();
 
       return SizedBox(
-        height: 205,
+        height: 230,
         child: Scrollbar(
           controller: scrollController,
           thumbVisibility: true,
@@ -189,7 +189,7 @@ Widget thumbnailWidget(List links){
             scrollDirection: Axis.horizontal,
             itemCount: links.length,
             itemBuilder: (context, index) {
-              if(links[index].toString().contains('youtu')){
+              /*if(links[index].toString().contains('youtu')){
                 return Padding(
                   padding: const EdgeInsets.only(left: 15, top: 10, bottom: 9), // left: 55
                   child: ClipRRect(
@@ -197,11 +197,16 @@ Widget thumbnailWidget(List links){
                     child: SizedBox(
                       //width: double.infinity,
                       width: 355,
-                      child: PlayYoutubeVideo(link: links[index]),
+                      child: GestureDetector(
+                        onTap: () {
+                          PlayYoutubeVideo(link: links[index]);
+                        },
+                        child: ,
+                      ),
                     ),
                   ),
                 );
-              }
+              }*/
               return GestureDetector(
                 onTap: () async {
                   if (!await launchUrl(Uri.parse(links[0]))) {
@@ -214,66 +219,36 @@ Widget thumbnailWidget(List links){
                     if(snapshot.hasData){
                       return Padding(
                         padding: const EdgeInsets.only(left: 15, top: 10, bottom: 10), // left: 55
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Column(
-                            children: [
-                              Container(
-                                //width: double.infinity,
-                                width: 200,
-                                decoration: BoxDecoration(
-                                    color: Colors.grey.shade100
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      //link
-                                      Text(
-                                        links[index],
-                                        style: const TextStyle(
-                                            color: Colors.blue,
-                                            decoration: TextDecoration.underline,
-                                            decorationColor: Colors.blue
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                        child: Column(
+                          children: [
 
-                                      //title
-                                      Text(
-                                        snapshot.data!.title ?? '',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold
-                                        ),
-                                        maxLines: 1,
-                                      ),
-
-                                      //desc
-                                      Text(
-                                        snapshot.data!.desc ?? '',
-                                        style: TextStyle(
-                                            color: Colors.grey.shade700
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-
-                              CachedNetworkImage(
-                                //width: double.infinity,
-                                width: 200,
-                                height: 105,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: CachedNetworkImage(
+                                width: 300,
+                                height: 169,
                                 imageUrl: snapshot.data!.image ?? '',
                                 fit: BoxFit.cover,
                               ),
+                            ),
 
-                            ],
-                          ),
+                            SizedBox(
+                              width: 300,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
+                                child: Text(
+                                  snapshot.data!.title ?? '',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 2,
+                                  textScaler: const TextScaler.linear(0.8),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+
+                          ],
                         ),
                       );
                     }
@@ -294,97 +269,72 @@ Widget thumbnailWidget(List links){
       );
     }
     else{
-      if(links[0].toString().contains('youtu')){
+      /*if(links[0].toString().contains('youtu')){
         return Padding(
             padding: const EdgeInsets.only(left: 55, right: 20, top: 10),
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: PlayYoutubeVideo(link: links[0]))
         );
-      }else{
-        return GestureDetector(
-          onTap: () async {
+      }*/
+      return GestureDetector(
+        onTap: () async {
+          //if youtube video then play video
+          if(links[0].toString().contains('youtu')){
+            ScreenNavigator.openScreen(context, PlayYoutubeVideo(link: links[0]), 'BottomToTop');
+          }//otherwise launch the link or view the photo
+          else{
             if (!await launchUrl(Uri.parse(links[0]))) {
               throw Exception('Could not launch ${links[0]}');
             }
-          },
-          child: FutureBuilder(
-            future: AnyLinkPreview.getMetadata(link: links[0]),
-            builder: (context, snapshot) {
-              if(snapshot.hasData){
-                return Padding(
-                  padding: const EdgeInsets.only(left: 55, right: 20, top: 10),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: Colors.grey.shade100
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                //link
-                                Text(
-                                  links[0],
-                                  style: const TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: Colors.blue
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+          }
+        },
+        child: FutureBuilder(
+          future: AnyLinkPreview.getMetadata(link: links[0]),
+          builder: (context, snapshot) {
+            if(snapshot.hasData){
+              return Padding(
+                padding: const EdgeInsets.only(left: 55, right: 20, top: 10),
+                child: Column(
+                  children: [
 
-                                //title
-                                Text(
-                                  snapshot.data!.title ?? '',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold
-                                  ),
-                                ),
-
-                                //desc
-                                Text(
-                                  snapshot.data!.desc ?? '',
-                                  style: TextStyle(
-                                      color: Colors.grey.shade700
-                                  ),
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        CachedNetworkImage(
-                          width: double.infinity,
-                          imageUrl: snapshot.data!.image ?? '',
-                          fit: BoxFit.cover,
-                        ),
-
-                      ],
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: CachedNetworkImage(
+                        width: double.infinity,
+                        imageUrl: snapshot.data!.image ?? '',
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                );
-              }
-              else if(snapshot.connectionState == ConnectionState.waiting){
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              else{
-                return const SizedBox();
-              }
-            },
-          ),
-        );
-      }
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5, left: 5, right: 10),
+                      child: Text(
+                        snapshot.data!.title ?? '',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        textScaler: const TextScaler.linear(0.8),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+
+                  ],
+                ),
+              );
+            }
+            else if(snapshot.connectionState == ConnectionState.waiting){
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            else{
+              return const SizedBox();
+            }
+          },
+        ),
+      );
     }
   }
 }

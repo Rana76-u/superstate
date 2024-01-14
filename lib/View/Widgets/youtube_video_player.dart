@@ -16,16 +16,16 @@ class PlayYoutubeVideo extends StatefulWidget {
 }
 
 class _PlayYoutubeVideoState extends State<PlayYoutubeVideo> {
-  bool isMute = true;
+  bool isMute = false;
   bool showWatchAgainButton = false;
 
   late final YoutubePlayerController controller = YoutubePlayerController(
     initialVideoId: widget.videoId,
     flags: YoutubePlayerFlags(
-      mute: isMute,
-      autoPlay: false,
+      mute: isMute, //isMute
+      autoPlay: true,
       disableDragSeek: false,
-      loop: false,
+      loop: true,
       isLive: false,
       forceHD: false,
       enableCaption: true,
@@ -34,94 +34,99 @@ class _PlayYoutubeVideoState extends State<PlayYoutubeVideo> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        YoutubePlayerBuilder(
-          onExitFullScreen: () {
-            SystemChrome.setPreferredOrientations(DeviceOrientation.values);
-          },
-          player: YoutubePlayer(
-            controller: controller,
-            showVideoProgressIndicator: true,
-            progressIndicatorColor: Colors.red,
-            progressColors: const ProgressBarColors(
-              playedColor: Colors.red,
-              handleColor: Colors.grey,
-            ),
-            topActions: <Widget>[
-              const Expanded(child: SizedBox()),
-              IconButton(
-                icon: Icon(
-                  isMute ? MingCute.volume_mute_fill : MingCute.volume_fill,
-                  color: Colors.white,
-                  size: 25.0,
-                ),
-                onPressed: () {
-                  setState(() {
-                    isMute = !isMute;
-                    if (isMute) {
-                      controller.mute();
-                    } else {
-                      controller.unMute();
-                    }
-                  });
-                },
-              ),
-            ],
-            bottomActions: [
-              CurrentPosition(),
-              ProgressBar(
-                isExpanded: true,
-                colors: const ProgressBarColors(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Stack(
+          children: [
+            YoutubePlayerBuilder(
+              onExitFullScreen: () {
+                SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+              },
+              player: YoutubePlayer(
+                controller: controller,
+                showVideoProgressIndicator: true,
+                progressIndicatorColor: Colors.red,
+                progressColors: const ProgressBarColors(
                   playedColor: Colors.red,
                   handleColor: Colors.grey,
                 ),
+                topActions: <Widget>[
+                  const Expanded(child: SizedBox()),
+                  IconButton(
+                    icon: Icon(
+                      isMute ? MingCute.volume_mute_fill : MingCute.volume_fill,
+                      color: Colors.white,
+                      size: 25.0,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        isMute = !isMute;
+                        if (isMute) {
+                          controller.mute();
+                        } else {
+                          controller.unMute();
+                        }
+                      });
+                    },
+                  ),
+                ],
+                bottomActions: [
+                  CurrentPosition(),
+                  ProgressBar(
+                    isExpanded: true,
+                    colors: const ProgressBarColors(
+                      playedColor: Colors.red,
+                      handleColor: Colors.grey,
+                    ),
+                  ),
+                  RemainingDuration(),
+                  const PlaybackSpeedButton(),
+                  FullScreenButton(),
+                ],
+                onReady: () {
+                  /*final blocProvider = BlocProvider.of<YoutubePlayerBloc>(context);
+                  blocProvider.add(VideoPlayerReadyEvent());*/
+                },
+                onEnded: (metaData) {
+                  setState(() {
+                    showWatchAgainButton = true;
+                  });
+                },
               ),
-              RemainingDuration(),
-              const PlaybackSpeedButton(),
-              FullScreenButton(),
-            ],
-            onReady: () {
-              /*final blocProvider = BlocProvider.of<YoutubePlayerBloc>(context);
-              blocProvider.add(VideoPlayerReadyEvent());*/
-            },
-            onEnded: (metaData) {
-              setState(() {
-                showWatchAgainButton = true;
-              });
-            },
-          ),
-          builder: (context, player) => player,
-        ),
-        if (showWatchAgainButton)
-          Center(
-            heightFactor: 4,
-            child: GestureDetector(
-              onTap: () {
-                // Handle the logic for "Watch Again" button tap
-                setState(() {
-                  showWatchAgainButton = false;
-                  // Add any additional logic here for restarting the video
-                  controller.play();
-                });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: Colors.white,//.withOpacity(0.7)
-                ),
-                padding: const EdgeInsets.all(14),
-                child: const Text(
-                  'Watch Again',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold
+              builder: (context, player) => player,
+            ),
+            if (showWatchAgainButton)
+              Center(
+                heightFactor: 4,
+                child: GestureDetector(
+                  onTap: () {
+                    // Handle the logic for "Watch Again" button tap
+                    setState(() {
+                      showWatchAgainButton = false;
+                      // Add any additional logic here for restarting the video
+                      controller.play();
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.white,//.withOpacity(0.7)
+                    ),
+                    padding: const EdgeInsets.all(14),
+                    child: const Text(
+                      'Watch Again',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }

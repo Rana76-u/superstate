@@ -6,7 +6,7 @@ class ScreenNavigator {
 
     double dx = 0;
     double dy = 1;
-    
+
     Offset offset = Offset(dx, dy);
 
     if(transition == 'RightToLeft'){

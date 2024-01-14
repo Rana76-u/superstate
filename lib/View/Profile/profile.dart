@@ -8,6 +8,7 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -19,11 +20,11 @@ class Profile extends StatelessWidget {
                 ElevatedButton(
                     onPressed: () {
                       AuthService().signOut();
-                
+
                       ScreenNavigator.openScreen(context, const LoginPage(), 'BottomToTop');
                     },
                     child: const Text("Logout")
-                )
+                ),
               ],
             ),
           ),

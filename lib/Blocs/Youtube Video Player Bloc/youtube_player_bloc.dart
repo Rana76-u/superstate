@@ -3,7 +3,7 @@ import 'package:superstate/Blocs/Youtube%20Video%20Player%20Bloc/youtube_player_
 import 'package:superstate/Blocs/Youtube%20Video%20Player%20Bloc/youtube_player_states.dart';
 
 class YoutubePlayerBloc extends Bloc<YoutubePlayerEvents, YoutubePlayerStates>{
-  YoutubePlayerBloc() : super(const YoutubePlayerStates(isMute: true)){
+  YoutubePlayerBloc() : super(const YoutubePlayerStates(isMute: false)){
     on<YoutubePlayerEvents>((event, emit) {
       if(event is YoutubePlayerMuteEvent){
         emit(const YoutubePlayerStates(isMute: true));
