@@ -25,7 +25,7 @@ class CreatePostScreen extends StatelessWidget {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () {
-            ScreenNavigator.openScreen(context, const BottomBar(), 'LeftToRight');
+            ScreenNavigator.closeScreen(context);
           },
           child: const Icon(Icons.arrow_back),
         ),
@@ -42,7 +42,7 @@ class CreatePostScreen extends StatelessWidget {
             onTap: () {
               CRUDPost().create(textBoxController.text);
               ///if post complete then pop screen
-              ScreenNavigator.closeScreen(context);
+              ScreenNavigator.openScreen(context, const BottomBar(), 'LeftToRight');
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 10),

@@ -7,8 +7,8 @@ import 'package:superstate/Blocs/React%20Bloc/react_states.dart';
 import 'package:superstate/View/Home/home_appbar.dart';
 import 'package:superstate/View/Home/home_floating.dart';
 import 'package:superstate/View/Widgets/error.dart';
-import 'package:superstate/View/Widgets/loading.dart';
 import 'package:superstate/View/Widgets/postcard.dart';
+import 'package:superstate/View/Widgets/skeleton_postcard.dart';
 
 import '../../Blocs/React Bloc/react_events.dart';
 
@@ -62,7 +62,10 @@ class HomePage extends StatelessWidget{
 
                       final provider = BlocProvider.of<ReactBloc>(context);
 
-                      if (reactSnapshot.connectionState == ConnectionState.done) {
+                      if(reactSnapshot.connectionState == ConnectionState.waiting){
+                        return const SkeletonPostCard();
+                      }
+                      else if (reactSnapshot.connectionState == ConnectionState.done) {
                         // Check if data has been loaded
                         if (reactSnapshot.hasData && reactSnapshot.data!.exists) {
                           reaction = reactSnapshot.data!.get('react') ?? 0;
@@ -75,26 +78,26 @@ class HomePage extends StatelessWidget{
                         } else if (reaction == -1) {
                           provider.add(DislikeEvent(index: index));
                         }
-                      } else {
-                        // Data is still loading
-                        // You can choose to show a loading indicator or do nothing during loading
-                        //provider.add(NeutralEvent(index: index));
-                      }
 
-                      return postCard(
-                          snapshot.data!.docs[index].id,
-                          snapshot.data!.docs[index].get('commentCount'),
-                          snapshot.data!.docs[index].get('creationTime'),
-                          snapshot.data!.docs[index].get('fileLinks'),
-                          snapshot.data!.docs[index].get('postText'),
-                          snapshot.data!.docs[index].get('uid'),
-                          snapshot.data!.docs[index].get('likeCount'),
-                          snapshot.data!.docs[index].get('dislikeCount'),
-                          reaction, //state.reactList[index]
-                          context,
-                          state,
-                          index
-                      );
+                        return postCard(
+                            snapshot.data!.docs[index].id,
+                            snapshot.data!.docs[index].get('commentCount'),
+                            snapshot.data!.docs[index].get('creationTime'),
+                            snapshot.data!.docs[index].get('fileLinks'),
+                            snapshot.data!.docs[index].get('postText'),
+                            snapshot.data!.docs[index].get('uid'),
+                            snapshot.data!.docs[index].get('likeCount'),
+                            snapshot.data!.docs[index].get('dislikeCount'),
+                            reaction, //state.reactList[index]
+                            context,
+                            state,
+                            index
+                        );
+
+                      }
+                      else{
+                        return ShowErrorMessage().central(context, 'Error Loading Data');
+                      }
 
                     },
                 );
@@ -105,7 +108,15 @@ class HomePage extends StatelessWidget{
           else if(snapshot.connectionState == ConnectionState.waiting){
             return Padding(
                 padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.35),
-                child: Loading().centralLinearSized(context, 0.4)
+                //Loading().centralLinearSized(context, 0.4)
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    return const SkeletonPostCard();
+                  },
+                )
             );
           }
           else {

@@ -14,7 +14,6 @@ import 'package:superstate/ViewModel/crud_post.dart';
 import 'package:superstate/ViewModel/link_detector.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'error.dart';
-import 'loading.dart';
 
 Widget postCard(
     String postDocID,
@@ -130,9 +129,9 @@ Widget topPart(String uid, Timestamp creationTime) {
             ],
           );
         }
-        else if(snapshot.connectionState == ConnectionState.waiting){
+        /*else if(snapshot.connectionState == ConnectionState.waiting){
           return Loading().centralDefault(context, 'linear');
-        }
+        }*/
         else {
           return Padding(
               padding: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.35),
@@ -220,6 +219,7 @@ Widget thumbnailWidget(List links, BuildContext context){
                       return Padding(
                         padding: const EdgeInsets.only(left: 15, top: 10, bottom: 10), // left: 55
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
 
                             ClipRRect(
@@ -252,11 +252,11 @@ Widget thumbnailWidget(List links, BuildContext context){
                         ),
                       );
                     }
-                    else if(snapshot.connectionState == ConnectionState.waiting){
+                    /*else if(snapshot.connectionState == ConnectionState.waiting){
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
-                    }
+                    }*/
                     else{
                       return const SizedBox();
                     }
@@ -296,6 +296,7 @@ Widget thumbnailWidget(List links, BuildContext context){
               return Padding(
                 padding: const EdgeInsets.only(left: 55, right: 20, top: 10),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
                     ClipRRect(
@@ -324,11 +325,11 @@ Widget thumbnailWidget(List links, BuildContext context){
                 ),
               );
             }
-            else if(snapshot.connectionState == ConnectionState.waiting){
+            /*else if(snapshot.connectionState == ConnectionState.waiting){
               return const Center(
                 child: CircularProgressIndicator(),
               );
-            }
+            }*/
             else{
               return const SizedBox();
             }
