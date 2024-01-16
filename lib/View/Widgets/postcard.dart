@@ -305,6 +305,7 @@ Widget thumbnailWidget(List links, BuildContext context){
                         width: double.infinity,
                         imageUrl: snapshot.data!.image ?? '',
                         fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => const SizedBox(),
                       ),
                     ),
 
@@ -320,7 +321,6 @@ Widget thumbnailWidget(List links, BuildContext context){
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-
                   ],
                 ),
               );
