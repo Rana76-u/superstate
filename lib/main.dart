@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:receive_sharing_intent_plus/receive_sharing_intent_plus.dart';
 import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_bloc.dart';
+import 'package:superstate/Blocs/FilePicker%20Bloc/filepicker_bloc.dart';
 import 'package:superstate/Blocs/React%20Bloc/react_bloc.dart';
 import 'package:superstate/View/Create%20Post/create_post.dart';
 import 'package:superstate/View/Widgets/bottom_nav_bar.dart';
@@ -104,6 +105,7 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(create: (context) => BottomBarBloc(),),
           BlocProvider(create: (context) => ReactBloc(),),
           BlocProvider(create: (context) => YoutubePlayerBloc(),),
+          BlocProvider(create: (context) => PickFileBloc())
         ],
         child: MaterialApp(
           title: 'SuperState',
