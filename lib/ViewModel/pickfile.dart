@@ -1,49 +1,53 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:superstate/Blocs/FilePicker%20Bloc/filepicker_bloc.dart';
 import 'package:superstate/Blocs/FilePicker%20Bloc/filepicker_events.dart';
 
 class PickFile {
 
-  Future<List> pickMultiple(BuildContext context) async {
-
+  Future<List<File>> usingFilePicker(BuildContext context) async {
     final provider = BlocProvider.of<PickFileBloc>(context);
 
     FilePickerResult? result =
-        await FilePicker.platform.pickFiles(allowMultiple: true);
+    await FilePicker.platform.pickFiles(allowMultiple: true);
 
     if (result != null) {
-      List<File> files = result.paths.map((path) => File(path!)).toList();
+      List<File> files = [];
+      for (PlatformFile file in result.files) {
+        files.add(File(file.path!));
+      }
 
-      provider.add(PickFileEvents(isFilePicked: true, files: files));
+      provider.add(PickFileEvents(isFilePicked: true, files: files, isPosting: false));
       return files;
     } else {
       return [];
     }
   }
 
-  Future<String> uploadToFireStore(FilePickerResult filePickerResult) async {
-    Uint8List? fileBytes = filePickerResult.files.first.bytes;
-    //String fileName = filePickerResult.files.first.name;
+  /*File compressedFile = await FileCompressor().compress(File(file.path!));
+  files.add(compressedFile);*/
 
-    Reference ref = FirebaseStorage.instance.ref().child(
-        '${FirebaseAuth.instance.currentUser!.uid}/${DateTime.now().millisecondsSinceEpoch}');
+  Future<List> usingImagePicker(BuildContext context) async {
 
-    UploadTask uploadTask = ref.putData(fileBytes!);
-    TaskSnapshot snapshot = await uploadTask;
+    final ImagePicker picker = ImagePicker();
+    final provider = BlocProvider.of<PickFileBloc>(context);
 
-    if (snapshot.state == TaskState.success) {
-      String downloadURL = await snapshot.ref.getDownloadURL();
-      return downloadURL;
-    } else {
-      //messenger.showSnackBar(SnackBar(content: Text('An Error Occurred\n${snapshot.state}')));
-      return '';
+    // Pick multiple images and videos.
+    final List<XFile> result = await picker.pickMultiImage();
+
+    List<File> files = [];//result.paths.map((path) => File(path!)).toList();
+
+    for(int i=0; i<result.length; i++){
+
+      //files.add(await FileCompressor().compress(File(result[i].path)));
+      files.add(File(result[i].path));
     }
+
+    provider.add(PickFileEvents(isFilePicked: true, files: files, isPosting: false));
+    return files;
 
   }
 }

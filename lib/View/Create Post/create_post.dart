@@ -2,13 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icons_plus/icons_plus.dart';
 import 'package:receive_sharing_intent_plus/receive_sharing_intent_plus.dart';
 import 'package:superstate/Blocs/FilePicker%20Bloc/filepicker_bloc.dart';
+import 'package:superstate/Blocs/FilePicker%20Bloc/filepicker_events.dart';
 import 'package:superstate/Blocs/FilePicker%20Bloc/filepicker_states.dart';
 import 'package:superstate/View/Widgets/bottom_nav_bar.dart';
 import 'package:superstate/View/Widgets/navigator.dart';
+import 'package:superstate/View/Widgets/video_player.dart';
 import 'package:superstate/ViewModel/crud_post.dart';
 import 'package:superstate/ViewModel/pickfile.dart';
+
+import '../../ViewModel/filetype_extractor.dart';
+import '../Widgets/loading.dart';
 
 class CreatePostScreen extends StatelessWidget {
   final String sharedText;
@@ -48,7 +54,16 @@ class CreatePostScreen extends StatelessWidget {
             actions: [
               GestureDetector(
                 onTap: () {
-                  CRUDPost().create(textBoxController.text);
+                  final provider = BlocProvider.of<PickFileBloc>(context);
+                  provider.add(
+                      PickFileEvents(
+                        isFilePicked: state.isFilePicked,
+                        files: state.files,
+                        isPosting: true
+                      )
+                  );
+
+                  CRUDPost().create(textBoxController.text, state.files);
                   ///if post complete then pop screen
                   ScreenNavigator.openScreen(context, const BottomBar(), 'LeftToRight');
                 },
@@ -74,7 +89,10 @@ class CreatePostScreen extends StatelessWidget {
               )
             ],
           ),
-          body: SingleChildScrollView(
+          body: state.isPosting == true ?
+          Loading().centralLinearSized(context, 0.4)
+          :
+          SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: Column(
@@ -173,68 +191,89 @@ class CreatePostScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ElevatedButton(
-            onPressed: () async {
-              PickFile().pickMultiple(context);
-            },
-            child: const Text('Pick Files')
+        Row(
+          children: [
+            ElevatedButton(
+                onPressed: () async {
+                  PickFile().usingImagePicker(context);
+                },
+                child: const Row(
+                  children: [
+                    Icon(Icons.image, color: Colors.green,),
+                    SizedBox(width: 10,),
+                    Icon(MingCute.video_fill, color: Colors.purple,) //video_file_rounded
+                  ],
+                )
+            ),
+
+            const SizedBox(width: 8,),
+
+            ElevatedButton(
+                onPressed: () async {
+                  PickFile().usingFilePicker(context);
+                },
+                child: const Icon(MingCute.folder_fill, color: Colors.blueGrey,), //file_upload_fill
+            ),
+          ],
         ),
 
-        state.files != [] ?
-        SizedBox(
-          height: 150,
-          width: double.infinity,
-          child: ListView.builder(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: state.files.length,
-            itemBuilder: (context, index) {
-              String fileExtension = state.files[index].path.split('.').last.toLowerCase();
-              String fileType = '';
-              if (fileExtension == 'jpg' || fileExtension == 'jpeg' || fileExtension == 'png') {
-                fileType = 'image';
-              }else if (fileExtension == 'mp4' || fileExtension == 'avi' || fileExtension == 'mov'){
-                fileType = 'video';
-              }else if (fileExtension == 'pdf') {
-                fileType = 'pdf';
-              }else if (fileExtension == 'gif'){
-                fileType = 'gif';
-              }else if (fileExtension == 'mp3' || fileExtension == 'wav') {
-                fileType = 'audio';
-              }
+        Padding(
+            padding: const EdgeInsets.only(top: 15),
+            child: showPickedItem(context, state))
+      ],
+    );
+  }
+  
+  Widget showPickedItem(BuildContext context, PickFileState state) {
+    return state.files != [] ?
+    SizedBox(
+      height: 500, //170
+      width: double.infinity,
+      child: ListView.builder(
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        itemCount: state.files.length,
+        itemBuilder: (context, index) {
 
-              List<String> pathParts = state.files[index].path.split('/');
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: SizedBox(
-                  width: 150,
-                  child: Column(
-                    children: [
-                      fileType == 'image' || fileType == 'gif' ?
+          String fileType = fileTypeExtractor(state.files[index]);
+
+          List<String> pathParts = state.files[index].path.split('/');
+          return Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: SizedBox(
+                width: 150,
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: fileType == 'image' || fileType == 'gif' ?
                       Image.file(
                         state.files[index],
                         fit: BoxFit.cover,
                       )
                           :
+                      fileType == 'video' ?
+                      VideoPlayerScreen(videoPath: state.files[index],)
+                          :
                       const Icon(Icons.insert_drive_file, size: 50, color: Colors.grey),
+                    ),
 
-                      Text(
-                        pathParts.last,
-                        style: const TextStyle(
-                          overflow: TextOverflow.ellipsis
-                        ),
-                      )
-                    ],
-                  )
-                ),
-              );
+                    Text(
+                      pathParts.last,
+                      style: const TextStyle(
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: null,
+                    )
+                  ],
+                )
+            ),
+          );
 
-            },
-          ),
-        )
-            :
-        const SizedBox(),
-      ],
-    );
+        },
+      ),
+    )
+        :
+    const SizedBox();
   }
 }

@@ -1,16 +1,18 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:linkify/linkify.dart';
+import 'package:superstate/ViewModel/file_uploader.dart';
 import '../Blocs/React Bloc/react_bloc.dart';
 import '../Blocs/React Bloc/react_events.dart';
 import 'notification_sender.dart';
 
 class CRUDPost {
 
-  void create(String postText) async {
+  void create(String postText, List<File> files) async {
     //generate and unique Post ID
     Random random = Random();
     String postID = '';
@@ -34,6 +36,9 @@ class CRUDPost {
       postText = " $postText";
     }
 
+    //upload files and get download links
+    List<dynamic> downloadLinks = await uploadFilesToFirebase(files);
+
     //Save Post items into PostID
     await FirebaseFirestore
         .instance
@@ -46,7 +51,7 @@ class CRUDPost {
       'dislikeCount': 0,
       'likeCount': 0,
       'commentCount': 0,
-      'fileLinks': FieldValue.arrayUnion([]),
+      'fileLinks': FieldValue.arrayUnion(downloadLinks),
     });
 
     //Save PostID at users Profile
