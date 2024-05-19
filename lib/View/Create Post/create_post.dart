@@ -179,7 +179,7 @@ class CreatePostScreen extends StatelessWidget {
               color: Colors.grey,
             ),
             filled: false,
-            hintText: 'Express! freedom is here . . .',
+            hintText: 'tmc',
           ),
           cursorColor: Colors.black,
         ),

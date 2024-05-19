@@ -108,7 +108,7 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(create: (context) => PickFileBloc())
         ],
         child: MaterialApp(
-          title: 'SuperState',
+          title: '#Repost',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,

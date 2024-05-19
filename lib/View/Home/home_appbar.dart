@@ -15,11 +15,13 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       title: const Text(
-        'SuperState',
+        '#Repost',
         style: TextStyle(
           fontSize: 25,
           letterSpacing: 1,
-          fontWeight: FontWeight.bold
+          fontWeight: FontWeight.bold,
+          color: Colors.deepOrange,
+          fontFamily: 'Anurati'
         ),
       ),
       actions: [

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:superstate/Blocs/Bottom%20Navigation%20Bloc/bottom_navigation_bloc.dart';
@@ -29,7 +30,7 @@ class LoginPage extends StatelessWidget {
         'phoneNumber': FirebaseAuth.instance.currentUser!.phoneNumber,
         'gender': 'not selected',
         'posts': FieldValue.arrayUnion([]),
-        'token': ''
+        'token': '',
       });
     }
 
@@ -55,40 +56,19 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
 
-          Stack(
-            children: [
-              ShaderMask(
-                shaderCallback: (rect) {
-                  return const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.black, Colors.transparent],
-                  ).createShader(Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).size.height*0.4)); //rect.width rect.height
-                },
-                blendMode: BlendMode.dstIn,
-                child: Image.asset(
-                  'assets/images/world-map-dotted.jpg',
-                  fit: BoxFit.cover,
-                  height: MediaQuery.of(context).size.height*0.5,
-                  width: double.infinity,
-                ),
-              ),
+          const Spacer(),
 
-              Positioned(
-                top: MediaQuery.of(context).size.height*0.32,
-                left: 30,
-                child: const Text(
-                  'SuperState',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 35,
-                  ),
-                ),
-              ),
-
-            ],
+          const Text(
+            '#Repost',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 35,
+              color: Colors.deepOrange,
+              fontFamily: 'Anurati'
+            ),
           ),
 
           const Spacer(),

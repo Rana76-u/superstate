@@ -6,6 +6,7 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:like_button/like_button.dart';
 import 'package:superstate/Blocs/React%20Bloc/react_states.dart';
+import 'package:superstate/View/Profile/profile.dart';
 import 'package:superstate/View/View%20Post/view_post.dart';
 import 'package:superstate/View/Widgets/navigator.dart';
 import 'package:superstate/View/Widgets/profile_image.dart';
@@ -16,18 +17,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'error.dart';
 
 Widget postCard(
-    String postDocID,
-    int commentCount,
-    Timestamp creationTime,
-    List<dynamic> fileLinks,
-    String postText,
-    String uid,
-    int likeCount,
-    int dislikeCount,
-    int reaction,
-    BuildContext context,
-    ReactState state,
-    int index) {
+    String postDocID, int commentCount, Timestamp creationTime, List<dynamic> fileLinks,
+    String postText, String uid, int likeCount, int dislikeCount, int reaction,
+    BuildContext context, ReactState state, int index) {
 
   return GestureDetector(
     onTap: () {
@@ -102,31 +94,36 @@ Widget topPart(String uid, Timestamp creationTime) {
       future: FirebaseFirestore.instance.collection('userData').doc(uid).get(), 
       builder: (context, snapshot) {
         if(snapshot.hasData){
-          return Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                child: profileImage(snapshot.data!.get('imageURL'), 35, 35),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    snapshot.data!.get('name'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold
+          return GestureDetector(
+            onTap: () {
+              ScreenNavigator.openScreen(context, Profile(uid: uid), 'BottomToTop');
+            },
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  child: profileImage(snapshot.data!.get('imageURL'), 35, 35),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      snapshot.data!.get('name'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold
+                      ),
                     ),
-                  ),
-                  Text(
-                    formatDuration(difference),
-                    style: TextStyle(
-                        color: Colors.grey.shade700,
-                      fontSize: 10.5
+                    Text(
+                      formatDuration(difference),
+                      style: TextStyle(
+                          color: Colors.grey.shade700,
+                        fontSize: 10.5
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           );
         }
         /*else if(snapshot.connectionState == ConnectionState.waiting){
@@ -357,21 +354,12 @@ Future<bool?> onDislikeButtonTapped(int reaction, String postDocID, int index, B
 }
 
 Widget bottomPart(
-    String postDocID,
-    int reaction,
-    int commentCount,
-    int likeCount,
-    int dislikeCount,
-    BuildContext context,
-    ReactState state,
-    int index,
-    Timestamp creationTime,
-    List<dynamic> fileLinks,
-    String postText,
-    String uid) {
+    String postDocID, int reaction, int commentCount, int likeCount,
+    int dislikeCount, BuildContext context, ReactState state, int index,
+    Timestamp creationTime, List<dynamic> fileLinks, String postText, String uid) {
   return Padding(
     padding: const EdgeInsets.only(top: 8),
-    child: Column(
+    child:  Column(
       children: [
         Row(
           children: [
@@ -397,7 +385,7 @@ Widget bottomPart(
                         ),
                         'RightToLeft');
                   },
-                child: const Icon(MingCute.chat_1_line)
+                  child: const Icon(MingCute.chat_1_line)
               ),
             ),
 

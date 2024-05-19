@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +25,7 @@ class BottomBar extends StatelessWidget {
                 ? const HomePage()
                 : state.currentIndex == 1
                 ? const NotificationPage()
-                : const Profile(),
+                : Profile(uid: FirebaseAuth.instance.currentUser!.uid),
           ),
           //child: _options[widget.bottomIndex],
           bottomNavigationBar: FlashyTabBar(
